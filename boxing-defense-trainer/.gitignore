@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.log
+.DS_Store
+.env
+.env.*
+.vite/
+*.tsbuildinfo
+docs/architecture/exports/

@@ -1,0 +1,19 @@
+/**
+ * Responsibility: Tailwind entry point and the few global element defaults.
+ *
+ * Design tokens are NOT defined here — they live in `tailwind.config.ts`, which
+ * this file loads via `@config`. Component-specific styling belongs in the
+ * component, expressed with Tailwind utilities built from those tokens.
+ */
+@import 'tailwindcss';
+@config '../tailwind.config.ts';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-950 font-sans text-ink-100 antialiased;
+}
