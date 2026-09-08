@@ -4,7 +4,8 @@ build/
 coverage/
 .turbo/
 .cache/
-package-lock.json
+# Lockfiles are committed: `npm ci` in apps/web/Dockerfile and in CI
+# installs from package-lock.json alone, and fails without it.
 pnpm-lock.yaml
 yarn.lock
 *.log

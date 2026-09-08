@@ -1,0 +1,48 @@
+# Keep the build context to what `npm ci` and `vite build` actually read.
+# Anything listed here is never sent to the daemon, so it can neither slow the
+# build nor leak into an image layer.
+#
+# Note on syntax: these are path patterns, not gitignore rules. `*` does not
+# cross a `/`, so a bare `*.md` would only match markdown in this directory and
+# would quietly miss the colocated docs under src/. Hence the `**/` prefixes.
+
+# Reinstalled in the deps stage from the lockfile; the host copy is the wrong
+# platform's binaries and by far the largest thing in this directory.
+**/node_modules
+
+# Produced by the build stage. Copying a stale host build in would let it
+# shadow the real output.
+dist
+dist-ssr
+**/*.local
+
+# Not read by the build, and it would bust the cache on every commit.
+.git
+.gitignore
+
+# Documentation, including the README.md colocated with each module. Nothing at
+# runtime serves these — the app ships as a compiled bundle, so no markdown
+# needs to reach the image.
+**/*.md
+
+# Tests and their config: the image ships the app, not its test suite.
+**/*.test.*
+**/*.spec.*
+**/__tests__
+**/__mocks__
+coverage
+
+# Secrets. These must come from the runtime environment, never a layer.
+.env
+.env.*
+
+# Local tooling noise.
+**/.vscode
+**/.idea
+**/.DS_Store
+**/*.log
+**/*.tsbuildinfo
+.prettierignore
+.prettierrc.json
+Dockerfile
+.dockerignore
