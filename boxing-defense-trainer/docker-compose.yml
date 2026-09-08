@@ -1,0 +1,67 @@
+# Boxing Defense Trainer — local container stack.
+#
+#   docker compose build web
+#   docker compose up web      ->  http://localhost:8080
+#
+# See docker/README.md for what each piece is doing and why.
+
+services:
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      # apps/web stays the main context so apps/web/.dockerignore applies to it.
+      # docker/ is attached as a second, named context instead, which is how the
+      # Dockerfile reaches nginx.conf without widening the context to the repo.
+      additional_contexts:
+        config: ./docker
+    image: boxing-defense-trainer/web:local
+    container_name: boxing-defense-trainer-web
+    ports:
+      # host:container. The container half is 8080, not 80, because nginx runs
+      # unprivileged and cannot bind a port below 1024. The host half is
+      # overridable — 8080 is a popular port, and a collision on it should not
+      # mean editing a tracked file:  WEB_PORT=8090 docker compose up web
+      - "${WEB_PORT:-8080}:8080"
+    restart: unless-stopped
+    # The image is static content and a config file; nothing should ever write
+    # to its filesystem. tmpfs covers the pid file and scratch paths that
+    # docker/nginx.conf points at /tmp.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  # ---------------------------------------------------------------------------
+  # enable when backend is implemented, see docs/adr/0001-no-backend-for-mvp.md
+  #
+  # The MVP is deliberately local-first and has no backend, so `web` depends on
+  # nothing. When services/api gains a Dockerfile, uncomment this block and add
+  # to `web` above:
+  #
+  #     depends_on:
+  #       api:
+  #         condition: service_healthy
+  #
+  # ---------------------------------------------------------------------------
+  # api:
+  #   build:
+  #     context: ./services/api
+  #     dockerfile: Dockerfile
+  #   image: boxing-defense-trainer/api:local
+  #   container_name: boxing-defense-trainer-api
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: "3000"
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/health"]
+  #     interval: 30s
+  #     timeout: 3s
+  #     retries: 3
+  #     start_period: 10s

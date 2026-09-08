@@ -1,0 +1,94 @@
+# Verifies the web image still builds and still serves. Nothing is pushed to a
+# registry yet — see docker/README.md for what to add when that changes.
+#
+# This file lives at the repository root because that is the only place GitHub
+# reads workflows from. The project itself is one level down, hence the
+# boxing-defense-trainer/ prefix on every path below.
+name: docker-build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'boxing-defense-trainer/apps/web/**'
+      - 'boxing-defense-trainer/docker/**'
+      - 'boxing-defense-trainer/docker-compose.yml'
+      - '.github/workflows/docker-build.yml'
+  pull_request:
+    paths:
+      - 'boxing-defense-trainer/apps/web/**'
+      - 'boxing-defense-trainer/docker/**'
+      - 'boxing-defense-trainer/docker-compose.yml'
+      - '.github/workflows/docker-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Build web image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: boxing-defense-trainer/apps/web
+          file: boxing-defense-trainer/apps/web/Dockerfile
+          # Mirrors additional_contexts in docker-compose.yml.
+          build-contexts: |
+            config=boxing-defense-trainer/docker
+          push: false
+          # Load into the local daemon so the smoke test below can run it.
+          load: true
+          tags: boxing-defense-trainer/web:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # A build that succeeds can still produce an image that cannot start —
+      # the non-root user and the nginx config are only exercised at runtime.
+      - name: Smoke test
+        run: |
+          set -euo pipefail
+
+          docker run -d --name web-smoke \
+            -p 8080:8080 --read-only --tmpfs /tmp \
+            boxing-defense-trainer/web:ci
+
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/ >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+
+          echo "::group::Index"
+          curl -fsS http://localhost:8080/ | head -20
+          echo "::endgroup::"
+
+          echo "Asserting the server runs unprivileged"
+          test "$(docker exec web-smoke id -u)" != "0"
+
+          echo "Asserting the SPA fallback serves index.html"
+          curl -fsS http://localhost:8080/some/client/route | grep -q '<div id="root">'
+
+          echo "Asserting the security headers are present"
+          headers="$(curl -fsSI http://localhost:8080/)"
+          grep -qi 'x-content-type-options: nosniff'  <<<"$headers"
+          grep -qi 'x-frame-options: DENY'            <<<"$headers"
+          grep -qi 'referrer-policy:'                 <<<"$headers"
+
+      - name: Report image size
+        if: always()
+        run: docker image ls boxing-defense-trainer/web:ci
+
+      - name: Tear down
+        if: always()
+        run: docker rm -f web-smoke 2>/dev/null || true
