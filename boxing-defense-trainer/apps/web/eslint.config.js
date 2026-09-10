@@ -89,6 +89,11 @@ export default tseslint.config(
               group: ['react/*', 'react-dom/*', 'motion', 'motion/*'],
               message: 'src/boxing/** must stay framework-agnostic.',
             },
+            {
+              group: ['**/components/**', '**/hooks/**', '**/pages/**', '**/animations/**'],
+              message:
+                'src/boxing/** is the domain layer: the UI imports from it, never the other way round. Nothing in components/, hooks/, pages/ or animations/ may be imported here.',
+            },
           ],
         },
       ],

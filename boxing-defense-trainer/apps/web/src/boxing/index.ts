@@ -3,16 +3,59 @@
  * imports from `../boxing`, never from a file deep inside it, so the domain's
  * internal structure can change without touching the UI.
  */
-export { generateAttackSequence } from './engine/attackEngine'
-export type { GenerateSequenceOptions, RandomSource } from './engine/attackEngine'
+export {
+  ALL_PUNCHES,
+  ATTACK_CATALOGUE,
+  attackFor,
+  mirrorDefense,
+  punchHand,
+  resolveForStance,
+} from './attacks'
 
-export { detectDefense } from './engine/defenseDetector'
-export type { DefenseDetection } from './engine/defenseDetector'
+export { ALL_DEFENSES, DEFENSE_CATALOGUE, isValidDefense, punchesAnsweredBy } from './defenses'
+export type { DefenseMeta } from './defenses'
 
-export { scoreAttack, summariseSession } from './engine/scoring'
-export { nextDifficulty } from './engine/difficulty'
+export { calibrate, calibrationFailureMessage } from './calibration'
+export type { CalibrationFailure, CalibrationResult } from './calibration'
 
-export { initialTrainingState, trainingReducer } from './state/trainingMachine'
-export type { TrainingEvent, TrainingState } from './state/trainingMachine'
+export { generateNextSequence, getInterAttackDelay, getIntraSequenceDelay } from './attackEngine'
+export type { RandomSource } from './attackEngine'
 
-export { COUNTDOWN_SECONDS, DIFFICULTY, MOVEMENT, POSE, SCORING, TIMING } from './config/thresholds'
+export {
+  delayRangeFor,
+  nextDifficulty,
+  punchPoolFor,
+  sequenceShapeFor,
+  timingToleranceFactorFor,
+} from './difficulty'
+export type { DelayRange, SequenceShape } from './difficulty'
+
+export {
+  detectDefense,
+  detectGuard,
+  detectParry,
+  detectRoll,
+  detectSlip,
+  detectStepBack,
+} from './defenseDetector'
+export type { DefenseDetection, DetectionContext, LateralDirection } from './defenseDetector'
+
+export { scoreBalance, scoreDefense, scoreMovement, scoreReaction } from './scoring'
+export type { ScoreDefenseInput } from './scoring'
+
+export {
+  accumulate,
+  allowedTargets,
+  averageReactionMs,
+  averageScore,
+  canTransition,
+  emptyRoundStats,
+  initialTrainingState,
+  isRoundComplete,
+  toDefenseResult,
+  trainingReducer,
+} from './trainingStateMachine'
+export type { TrainingEvent, TrainingEventKind } from './trainingStateMachine'
+
+export { THRESHOLDS } from './config/thresholds'
+export type { DifficultySettings } from './config/thresholds'
