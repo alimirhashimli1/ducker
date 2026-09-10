@@ -2,14 +2,24 @@
 
 ## Responsibility
 
-The heads-up display layered over the training view: current round, difficulty,
-time remaining, the combo being thrown, and the session controls (start, pause,
-resume, end). It is the user's read on the state of the session and the place
-they act on it, translating clicks into callbacks the page passes down.
+The live readout of a round: punch progress, the round clock, the running score
+and reaction average, the last exchange's breakdown, and the Start/Pause
+control.
+
+Purely presentational — every value arrives as a prop from `useTrainingSession`.
+It reflects the state machine; it never advances it. The two buttons call
+callbacks and nothing else.
+
+Deliberately sparse. The spec asks for an uncluttered training screen, and the
+user's attention belongs on the boxer, not on this panel. The score breakdown
+sits in a fixed-height slot so the panel does not jump as results come and go.
 
 ## Does NOT contain
 
-The session state machine (`src/boxing/state/trainingMachine.ts`) — the HUD
-displays a phase, it does not decide transitions. No score aggregation
-(`../ScoreDisplay/`), no countdown rendering (`../Countdown/`), no timers, and
-no round or duration constants of its own.
+Timers — `src/hooks/useTrainingSession.ts` owns the clock, including the round
+clock this displays. No scoring: every figure comes from `boxing/scoring.ts` via
+the session. No decision about when a round ends; that is
+`isRoundComplete` in `boxing/trainingStateMachine.ts`.
+
+Pose maths and thresholds do NOT belong here — see
+`src/boxing/defenseDetector.ts`.

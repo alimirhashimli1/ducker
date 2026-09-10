@@ -30,6 +30,8 @@ dist-ssr
 **/*.spec.*
 **/__tests__
 **/__mocks__
+src/test
+vitest.config.ts
 coverage
 
 # Secrets. These must come from the runtime environment, never a layer.
@@ -46,3 +48,7 @@ coverage
 .prettierrc.json
 Dockerfile
 .dockerignore
+
+# Vendored pose assets: opt-in via npm run pose:assets inside the image.
+public/mediapipe
+scripts

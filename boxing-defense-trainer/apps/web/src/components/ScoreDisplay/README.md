@@ -2,15 +2,21 @@
 
 ## Responsibility
 
-Presents scoring feedback: the running total, the current streak, the per-punch
-verdict as it happens (clean, late, wrong, missed) and the end-of-session
-summary. It turns `ScoreEvent` and `SessionScore` values into something readable
-at a glance by someone who is out of breath.
+One exchange's breakdown: which defense was recognised, whether it was the right
+answer for the punch thrown (✓/✗), and the Reaction / Movement / Balance / Total
+figures behind it.
+
+It formats a `DefenseResult` it is handed. A miss has no defense to name, so it
+says "No defense" rather than rendering a blank row.
+
+`bare` drops the component's own frame, for embedding in a panel that already
+has one — which is how `TrainingHUD` uses it.
 
 ## Does NOT contain
 
-The scoring rules — points, timing windows and outcome classification all live
-in `src/boxing/engine/scoring.ts` and arrive here already computed. No
-persistence or history across sessions (that would need a backend, which the MVP
-does not have — see `docs/adr/0001-no-backend-for-mvp.md`), and no point values
-hardcoded in markup.
+Any scoring. Every number here is computed in `src/boxing/scoring.ts`; this
+rounds them for display. No knowledge of the round, the session, or what happens
+next.
+
+Pose maths and thresholds do NOT belong here — see
+`src/boxing/defenseDetector.ts`.

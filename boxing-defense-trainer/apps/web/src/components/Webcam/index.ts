@@ -1,2 +1,2 @@
-export { Webcam } from './Webcam'
-export type { WebcamProps } from './Webcam'
+export { WebcamView } from './WebcamView'
+export type { WebcamViewProps } from './WebcamView'

@@ -4,3 +4,4 @@
  */
 export type * from './boxing'
 export type * from './pose'
+export type * from './training'
